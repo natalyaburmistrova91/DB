@@ -1,0 +1,66 @@
+USE vk;
+SHOW TABLES;
+
+-- 2. Подсчитать общее количество лайков, которые получили 10 самых молодых пользователей.
+DESC likes;
+SELECT * FROM likes;
+
+DESC users;
+SELECT * FROM users;
+
+DESC profiles;
+SELECT * FROM profiles;
+
+DESC target_types; 
+SELECT * FROM target_types;
+
+DESC messages;
+SELECT * FROM messages;
+
+DESC friendship;
+SELECT * FROM friendship;
+
+
+SELECT  
+	(SELECT CONCAT(first_name, ' ', last_name) 
+    FROM users u WHERE u.id = l.target_id) AS who_get_like, COUNT(id) AS Total_likes,
+    (SELECT TIMESTAMPDIFF(YEAR, birthday, NOW()) 
+    FROM profiles p WHERE p.user_id = l.target_id) AS age
+	FROM likes l
+	WHERE target_type_id =
+	(SELECT id FROM target_types WHERE name = 'users')
+	GROUP BY target_id
+	ORDER BY age
+	LIMIT 10;
+
+-- 3. Определить кто больше поставил лайков (всего) - мужчины или женщины?
+SELECT COUNT(user_id) AS Total_likes,
+    (SELECT gender                       
+    FROM profiles p 
+    WHERE p.user_id = l.user_id) AS gender
+	FROM likes l
+	GROUP BY gender;
+
+ 
+-- 4. Найти 10 пользователей, которые проявляют наименьшую активность в использовании социальной сети.
+-- критерии меньше всего лайков поставили, отправили сообщений, попытались зафрендить людей, согласились на чужие запросы
+
+
+SELECT  
+	(SELECT CONCAT(first_name, ' ', last_name) 
+    FROM users u WHERE u.id = l.user_id) AS name, COUNT(id) AS likes_made,
+    (SELECT COUNT(id) 
+    FROM messages m WHERE m.from_user_id = l.user_id) AS messages_sent,
+    (SELECT COUNT(user_id)
+    FROM friendship f WHERE f.user_id = l.user_id) AS friends_requests_send,
+    (SELECT COUNT(friend_id)
+    FROM friendship f WHERE f.friend_id = l.user_id
+    AND confirmed_at IS NOT NULL
+    AND status_id = (
+          SELECT id FROM friendship_statuses WHERE name = 'Confirmed'
+          )
+    ) AS friends_requests_accept
+	FROM likes l
+	GROUP BY user_id
+	ORDER BY messages_sent, friends_requests_send, friends_requests_accept, likes_made
+	LIMIT 10;
