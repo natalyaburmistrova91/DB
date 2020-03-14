@@ -1,0 +1,249 @@
+DROP TABLE IF EXISTS catalogs;
+CREATE TABLE catalogs (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) COMMENT 'Название раздела',
+  UNIQUE unique_name(name(10))
+) COMMENT = 'Разделы интернет-магазина';
+
+INSERT INTO catalogs VALUES
+  (NULL, 'Процессоры'),
+  (NULL, 'Материнские платы'),
+  (NULL, 'Видеокарты'),
+  (NULL, 'Жесткие диски'),
+  (NULL, 'Оперативная память');
+
+DROP TABLE IF EXISTS rubrics;
+CREATE TABLE rubrics (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) COMMENT 'Название раздела'
+) COMMENT = 'Разделы интернет-магазина';
+
+INSERT INTO rubrics VALUES
+  (NULL, 'Видеокарты'),
+  (NULL, 'Память');
+
+DROP TABLE IF EXISTS users;
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) COMMENT 'Имя покупателя',
+  birthday_at DATE COMMENT 'Дата рождения',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) COMMENT = 'Покупатели';
+
+INSERT INTO users (name, birthday_at) VALUES
+  ('Геннадий', '1990-10-05'),
+  ('Наталья', '1984-11-12'),
+  ('Александр', '1985-05-20'),
+  ('Сергей', '1988-02-14'),
+  ('Иван', '1998-01-12'),
+  ('Мария', '1992-08-29');
+
+DROP TABLE IF EXISTS products;
+CREATE TABLE products (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) COMMENT 'Название',
+  description TEXT COMMENT 'Описание',
+  price DECIMAL (11,2) COMMENT 'Цена',
+  catalog_id INT UNSIGNED,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY index_of_catalog_id (catalog_id)
+) COMMENT = 'Товарные позиции';
+
+INSERT INTO products
+  (name, description, price, catalog_id)
+VALUES
+  ('Intel Core i3-8100', 'Процессор для настольных персональных компьютеров, основанных на платформе Intel.', 7890.00, 1),
+  ('Intel Core i5-7400', 'Процессор для настольных персональных компьютеров, основанных на платформе Intel.', 12700.00, 1),
+  ('AMD FX-8320E', 'Процессор для настольных персональных компьютеров, основанных на платформе AMD.', 4780.00, 1),
+  ('AMD FX-8320', 'Процессор для настольных персональных компьютеров, основанных на платформе AMD.', 7120.00, 1),
+  ('ASUS ROG MAXIMUS X HERO', 'Материнская плата ASUS ROG MAXIMUS X HERO, Z370, Socket 1151-V2, DDR4, ATX', 19310.00, 2),
+  ('Gigabyte H310M S2H', 'Материнская плата Gigabyte H310M S2H, H310, Socket 1151-V2, DDR4, mATX', 4790.00, 2),
+  ('MSI B250M GAMING PRO', 'Материнская плата MSI B250M GAMING PRO, B250, Socket 1151, DDR4, mATX', 5060.00, 2);
+
+DROP TABLE IF EXISTS orders;
+CREATE TABLE orders (
+  id SERIAL PRIMARY KEY,
+  user_id INT UNSIGNED,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY index_of_user_id(user_id)
+) COMMENT = 'Заказы';
+
+
+DROP TABLE IF EXISTS orders_products;
+CREATE TABLE orders_products (
+  id SERIAL PRIMARY KEY,
+  order_id INT UNSIGNED,
+  product_id INT UNSIGNED,
+  total INT UNSIGNED DEFAULT 1 COMMENT 'Количество заказанных товарных позиций',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) COMMENT = 'Состав заказа';
+
+DROP TABLE IF EXISTS discounts;
+CREATE TABLE discounts (
+  id SERIAL PRIMARY KEY,
+  user_id INT UNSIGNED,
+  product_id INT UNSIGNED,
+  discount FLOAT UNSIGNED COMMENT 'Величина скидки от 0.0 до 1.0',
+  started_at DATETIME,
+  finished_at DATETIME,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY index_of_user_id(user_id),
+  KEY index_of_product_id(product_id)
+) COMMENT = 'Скидки';
+
+DROP TABLE IF EXISTS storehouses;
+CREATE TABLE storehouses (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) COMMENT 'Название',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) COMMENT = 'Склады';
+
+DROP TABLE IF EXISTS storehouses_products;
+CREATE TABLE storehouses_products (
+  id SERIAL PRIMARY KEY,
+  storehouse_id INT UNSIGNED,
+  product_id INT UNSIGNED,
+  value INT UNSIGNED COMMENT 'Запас товарной позиции на складе',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) COMMENT = 'Запасы на складе';
+
+
+INSERT INTO `orders` (`id`, `user_id`, `created_at`, `updated_at`) VALUES ('1', 3, '2019-07-18 04:20:52', '2019-08-26 13:12:38');
+INSERT INTO `orders` (`id`, `user_id`, `created_at`, `updated_at`) VALUES ('2', 3, '2019-09-08 17:15:59', '2019-07-05 08:02:27');
+INSERT INTO `orders` (`id`, `user_id`, `created_at`, `updated_at`) VALUES ('3', 3, '2019-06-01 09:56:50', '2019-09-22 15:46:33');
+INSERT INTO `orders` (`id`, `user_id`, `created_at`, `updated_at`) VALUES ('4', 5, '2019-12-04 17:34:43', '2019-05-03 14:19:21');
+INSERT INTO `orders` (`id`, `user_id`, `created_at`, `updated_at`) VALUES ('5', 6, '2019-06-24 23:34:37', '2019-04-20 09:45:29');
+INSERT INTO `orders` (`id`, `user_id`, `created_at`, `updated_at`) VALUES ('6', 6, '2019-03-29 01:14:06', '2019-08-27 09:20:01');
+INSERT INTO `orders` (`id`, `user_id`, `created_at`, `updated_at`) VALUES ('7', 3, '2019-07-05 14:23:36', '2019-03-28 19:09:56');
+INSERT INTO `orders` (`id`, `user_id`, `created_at`, `updated_at`) VALUES ('8', 4, '2019-05-23 14:44:02', '2019-09-11 14:40:26');
+INSERT INTO `orders` (`id`, `user_id`, `created_at`, `updated_at`) VALUES ('9', 1, '2019-08-09 03:55:01', '2019-10-21 05:47:56');
+INSERT INTO `orders` (`id`, `user_id`, `created_at`, `updated_at`) VALUES ('10', 3, '2019-05-09 14:38:34', '2019-12-10 17:09:56');
+INSERT INTO `orders` (`id`, `user_id`, `created_at`, `updated_at`) VALUES ('11', 3, '2019-10-18 22:37:09', '2020-02-23 16:26:27');
+INSERT INTO `orders` (`id`, `user_id`, `created_at`, `updated_at`) VALUES ('12', 3, '2020-02-02 14:21:13', '2019-10-05 11:48:58');
+INSERT INTO `orders` (`id`, `user_id`, `created_at`, `updated_at`) VALUES ('13', 5, '2019-06-28 20:12:56', '2020-02-16 00:09:39');
+INSERT INTO `orders` (`id`, `user_id`, `created_at`, `updated_at`) VALUES ('14', 6, '2019-09-27 15:34:21', '2019-12-19 14:52:45');
+INSERT INTO `orders` (`id`, `user_id`, `created_at`, `updated_at`) VALUES ('15', 5, '2019-07-11 06:57:46', '2019-07-29 06:27:49');
+INSERT INTO `orders` (`id`, `user_id`, `created_at`, `updated_at`) VALUES ('16', 6, '2020-01-14 13:19:33', '2019-11-18 12:36:07');
+INSERT INTO `orders` (`id`, `user_id`, `created_at`, `updated_at`) VALUES ('17', 5, '2019-04-21 20:28:08', '2019-08-23 11:51:31');
+INSERT INTO `orders` (`id`, `user_id`, `created_at`, `updated_at`) VALUES ('18', 1, '2019-10-04 08:16:21', '2019-08-29 12:27:49');
+INSERT INTO `orders` (`id`, `user_id`, `created_at`, `updated_at`) VALUES ('19', 6, '2019-08-08 23:12:16', '2019-06-24 18:40:18');
+INSERT INTO `orders` (`id`, `user_id`, `created_at`, `updated_at`) VALUES ('20', 4, '2019-05-20 10:33:30', '2019-07-31 03:34:33');
+
+
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('1', 18, 6, 5, '2019-07-28 22:24:50', '2019-09-27 22:23:19');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('2', 11, 6, 2, '2019-03-24 10:10:46', '2020-02-13 10:11:59');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('3', 4, 2, 5, '2020-02-14 23:16:48', '2019-04-10 15:26:56');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('4', 6, 7, 4, '2019-11-04 01:58:11', '2019-05-18 18:08:39');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('5', 12, 6, 7, '2019-04-05 01:43:59', '2019-05-06 02:54:21');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('6', 19, 3, 3, '2019-11-30 01:29:40', '2019-05-21 06:00:09');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('7', 15, 4, 1, '2020-01-14 15:46:06', '2019-04-24 21:17:49');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('8', 17, 7, 5, '2019-03-20 21:48:19', '2019-07-23 06:14:28');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('9', 14, 5, 5, '2019-05-26 15:50:58', '2019-05-19 08:51:22');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('10', 9, 2, 7, '2019-06-08 00:09:02', '2019-11-13 16:54:09');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('11', 16, 1, 4, '2019-04-21 08:56:38', '2019-11-20 22:50:11');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('12', 12, 1, 6, '2020-01-02 02:27:14', '2020-01-30 03:17:01');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('13', 13, 1, 3, '2019-04-01 02:01:18', '2019-04-07 07:26:12');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('14', 11, 1, 1, '2020-02-08 13:12:33', '2020-01-25 10:20:17');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('15', 17, 2, 4, '2019-06-07 01:27:18', '2019-12-18 18:50:47');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('16', 19, 1, 5, '2019-04-11 21:10:59', '2019-03-31 19:26:29');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('17', 18, 3, 4, '2020-02-12 21:29:01', '2019-05-11 00:35:37');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('18', 20, 2, 9, '2020-01-05 06:55:50', '2019-07-13 04:19:51');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('19', 10, 2, 1, '2019-07-17 13:01:26', '2020-01-11 20:08:59');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('20', 10, 1, 7, '2019-12-31 12:49:55', '2019-10-17 21:08:02');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('21', 3, 5, 1, '2019-04-01 18:12:58', '2019-09-07 12:42:28');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('22', 13, 2, 3, '2019-03-22 20:53:54', '2019-12-22 18:29:20');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('23', 2, 6, 9, '2019-07-01 08:04:18', '2020-01-28 11:53:33');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('24', 4, 7, 3, '2019-07-10 08:56:15', '2019-05-05 04:29:44');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('25', 11, 7, 4, '2019-10-25 13:49:17', '2019-12-20 17:37:04');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('26', 15, 1, 7, '2019-10-03 14:08:40', '2019-05-20 00:46:51');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('27', 1, 2, 3, '2019-11-07 04:55:20', '2019-10-09 14:37:00');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('28', 7, 6, 6, '2020-01-15 15:58:37', '2019-03-31 02:51:36');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('29', 13, 3, 2, '2019-08-03 19:19:13', '2020-02-28 11:18:40');
+INSERT INTO `orders_products` (`id`, `order_id`, `product_id`, `total`, `created_at`, `updated_at`) VALUES ('30', 6, 5, 1, '2019-10-22 05:53:30', '2019-09-14 14:16:11');
+
+
+UPDATE orders_products SET updated_at = CURRENT_TIMESTAMP() WHERE updated_at < created_at;
+UPDATE orders SET updated_at = CURRENT_TIMESTAMP() WHERE updated_at < created_at;
+
+-- Составьте список пользователей users, которые осуществили хотя бы один заказ orders в интернет магазине.
+
+SHOW TABLES;
+DESC orders;
+SELECT * FROM orders;
+DESC orders_products;
+SELECT * FROM orders_products;
+DESC users;
+SELECT * FROM users;
+
+
+SELECT
+  u.id,
+  u.name
+FROM
+  orders AS o
+JOIN
+  users AS u
+ON
+  u.id = o.user_id
+ GROUP BY u.id;
+ 
+ SELECT user_id, COUNT(id) FROM orders GROUP BY user_id HAVING COUNT(id) > 0; -- для проверки
+
+-- Выведите список товаров products и разделов catalogs, который соответствует товару.
+SELECT * FROM products;
+SELECT * FROM catalogs;
+
+ SELECT
+  p.id,
+  p.name,
+  c.name
+FROM
+  products AS p
+JOIN
+  catalogs AS c
+ON
+  p.catalog_id = c.id;
+ 
+ 
+-- (по желанию) Пусть имеется таблица рейсов flights (id, from, to) и таблица городов cities (label, name).
+--  Поля from, to и label содержат английские названия городов, поле name — русское. 
+-- Выведите список рейсов flights с русскими названиями городов.
+
+CREATE TABLE flights (
+  id SERIAL PRIMARY KEY,
+  name_from VARCHAR(255) COMMENT 'FROM',
+  name_to VARCHAR(255) COMMENT 'TO');
+  
+CREATE TABLE cities (
+  label VARCHAR(255) COMMENT 'ENGLISH',
+  name VARCHAR(255) COMMENT 'RUS'); 
+ 
+INSERT INTO flights (name_from, name_to) VALUES ('moscow', 'omsk'), ('novgorod', 'kazan'), ('irkutsk', 'moscow'), ('omsk', 'irkutsk'), ('moscow', 'kazan');
+INSERT INTO cities (label, name) VALUES ('moscow', 'Москва'), ('novgorod', 'Новгород'), ('irkutsk', 'Иркутск '), ('omsk', 'Омск'), ('kazan', 'Казань');
+
+SELECT * FROM flights;
+SELECT * FROM cities;
+
+ SELECT
+f.id,
+c1.name,
+c2.name
+FROM
+  flights AS f
+JOIN
+  cities AS c1
+JOIN
+  cities AS c2
+ON
+  f.name_from = c1.label and f.name_to = c2.label
+ ORDER BY id;
+
+DROP TABLE flights;
+DROP TABLE cities;
