@@ -1,0 +1,38 @@
+USE vk;
+
+-- 2. Подсчитать общее количество лайков, которые получили 10 самых молодых пользователей.
+
+DESC profiles;
+DESC users;
+DESC likes;
+SELECT * from target_types;
+SELECT * from likes WHERE target_type_id = 2;
+SELECT * from profiles;
+SELECT * from users;
+
+SELECT
+  u.id,
+  u.first_name,
+  u.last_name,
+  (SELECT birthday FROM profiles WHERE u.id = profiles.user_id) AS birthday,
+  COUNT(l.target_id)
+FROM
+  users AS u
+LEFT JOIN
+  likes AS l
+   	ON l.target_id = u.id AND l.target_type_id = 2
+GROUP BY u.id
+ORDER BY birthday DESC
+LIMIT 10;
+
+-- 3. Определить кто больше поставил лайков (всего) - мужчины или женщины?
+
+SELECT
+  p.gender,
+  COUNT(l.user_id)
+FROM
+  likes AS l
+JOIN
+  profiles AS p
+   	ON l.user_id = p.user_id
+GROUP BY p.gender;
