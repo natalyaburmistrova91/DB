@@ -1,0 +1,58 @@
+-- В базе данных shop и sample присутствуют одни и те же таблицы, учебной базы данных. 
+-- Переместите запись id = 1 из таблицы shop.users в таблицу sample.users. Используйте транзакции.
+CREATE DATABASE shop;
+CREATE DATABASE sample;
+
+
+USE shop;
+
+CREATE TABLE users (id INT NOT NULL, name VARCHAR(20), created_at VARCHAR(20), updated_at VARCHAR(20), PRIMARY KEY(id));
+INSERT INTO users (id, name, created_at, updated_at) VALUES 
+(1, 'Геннадий', '21.10.2017 8:10', '22.10.2017 8:11'),
+(2, 'Анастасия', '21.10.2017 8:10', '22.10.2017 8:11'),
+(3, 'Михаил', '24.10.2017 8:10', '30.10.2017 8:11'),
+(4, 'Надежда', '20.11.2017 8:10', '25.10.2017 8:11');
+
+SELECT * FROM users;
+
+USE sample;
+CREATE TABLE users (id INT NOT NULL, name VARCHAR(20), created_at VARCHAR(20), updated_at VARCHAR(20), PRIMARY KEY(id));
+SELECT * FROM users;
+
+START TRANSACTION;
+INSERT INTO users SELECT * FROM shop.users WHERE users.id = 1;
+-- ROLLBACK; проверка
+COMMIT;
+SELECT * from users;
+DROP TABLE users;
+
+-- Создайте представление, которое выводит название name товарной позиции из таблицы products и соответствующее название каталога name из таблицы catalogs.
+
+USE shop;
+
+CREATE TABLE products (id INT NOT NULL, name VARCHAR(20), catalog_id INT, PRIMARY KEY(id));
+INSERT INTO products (id, name, catalog_id) VALUES 
+(1, 'процессор AMD', 1),
+(2, 'видеокарта genius', 2),
+(3, 'монитор dell', 3),
+(4, 'процессор intel', 1);
+SELECT * FROM products;
+
+CREATE TABLE catalogs (id INT NOT NULL, name VARCHAR(20), PRIMARY KEY(id));
+INSERT INTO catalogs (id, name) VALUES 
+(1, 'процессоры'),
+(2, 'видеокарты'),
+(3, 'мониторы');
+SELECT * FROM catalogs;
+
+CREATE VIEW cat (product, catalog) AS 
+SELECT
+  p.name,
+  c.name
+FROM
+  products AS p
+JOIN
+  catalogs AS c
+WHERE p.catalog_id = c.id;
+
+SELECT * FROM cat;
