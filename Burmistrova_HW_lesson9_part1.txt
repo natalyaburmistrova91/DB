@@ -21,6 +21,8 @@ SELECT * FROM users;
 
 START TRANSACTION;
 INSERT INTO users SELECT * FROM shop.users WHERE users.id = 1;
+DELETE FROM shop.users WHERE users.id = 1;
+
 -- ROLLBACK; проверка
 COMMIT;
 SELECT * from users;
