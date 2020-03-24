@@ -1,0 +1,40 @@
+-- 1. Проанализировать какие запросы могут выполняться наиболее часто в процессе работы приложения и добавить необходимые индексы.
+
+USE vk;
+-- для поиска групп, в которые бы хотел вступить пользователь
+CREATE UNIQUE INDEX communities_name_uq ON communities(name);
+-- для определения списка друзей пользователя
+CREATE INDEX friendship_user_id_friend_id_idx ON friendship (user_id, friend_id);
+-- для поиска пользователя (для добавления в друзья, для написания сообщения)
+CREATE INDEX users_first_name_last_name ON users (first_name, last_name);
+
+-- 2. Задание на оконные функции.
+-- Провести аналитику в разрезе групп.
+-- Построить запрос, который будет выводить следующие столбцы:
+-- имя группы
+-- среднее количество пользователей в группах
+-- самый молодой пользователь в группе
+-- самый пожилой пользователь в группе
+-- количество пользователей в группе
+-- всего пользователей в системе
+-- отношение в процентах (количество пользователей в группе / всего пользователей в системе) * 100
+
+SHOW TABLES;
+DESC communities_users;
+SELECT * FROM communities_users;
+SELECT * FROM communities;
+SELECT * FROM profiles;
+
+SELECT DISTINCT communities.name,
+  AVG(communities_users.user_id) OVER () AS average,
+  MIN(TIMESTAMPDIFF(YEAR, profiles.birthday, NOW())) OVER w AS min_age,
+  MAX(TIMESTAMPDIFF(YEAR, profiles.birthday, NOW())) OVER w AS max_age,
+  COUNT(communities_users.user_id) OVER w AS total_users_in_community,
+  COUNT(communities_users.user_id) OVER() AS total,
+  COUNT(communities_users.user_id) OVER w / COUNT(communities_users.user_id) OVER() * 100 AS "%%"
+    FROM (communities
+       LEFT JOIN communities_users
+        ON communities.id = communities_users.community_id
+          JOIN profiles 
+            ON communities_users.user_id = profiles.user_id)
+        WINDOW w AS (PARTITION BY communities_users.community_id);
